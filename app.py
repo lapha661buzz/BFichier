@@ -2,24 +2,30 @@ import streamlit as st
 from openpyxl import load_workbook
 from io import BytesIO
 
+TAILLE_MAX = 10 * 1024 # 10 Ko
+
 st.set_page_config(page_title="Vérificateur Excel", page_icon="📊")
 
-st.title("📊 Vérificateur de fichier Excel")
-st.write("Chargez un fichier `.xlsx` pour vérifier s'il fait moins de 10 Ko et afficher le nombre de lignes.")
+st.title("📂 Vérification de plusieurs fichiers Excel")
+st.write("Chargez plusieurs fichiers `.xlsx`. Le total doit être inférieur à 10 Ko.")
 
-# Upload du fichier
-fichier = st.file_uploader("📁 Déposer un fichier Excel ici", type=["xlsx"])
+# Uploader plusieurs fichiers
+fichiers = st.file_uploader("📁 Déposez vos fichiers Excel ici", type=["xlsx"], accept_multiple_files=True)
 
-if fichier:
-    taille = len(fichier.getvalue())
-    st.write(f"📦 Taille du fichier : `{taille}` octets")
+if fichiers:
+    taille_totale = sum(len(f.getvalue()) for f in fichiers)
+    st.write(f"📦 Taille totale : `{taille_totale}` octets")
+    st.write(f"📁 Nombre de fichiers : `{len(fichiers)}`")
 
-    if taille >= 0 * 1024:
-        try:
-            wb = load_workbook(filename=BytesIO(fichier.read()), read_only=True)
-            ws = wb.active
-            nb_lignes = ws.max_row
-            st.success("✅ Le fichier est valide et sa taille est correcte.")
-            st.write(f"📈 Nombre total de lignes : `{nb_lignes}`")
-        except Exception as e:
-            st.error(f"❌ Erreur lors de la lecture du fichier : {e}")
+    if taille_totale > TAILLE_MAX:
+        st.error("❌ La taille totale dépasse 10 Ko.")
+    else:
+        st.success("✅ Tous les fichiers ont été acceptés (moins de 10 Ko au total).")
+        for fichier in fichiers:
+            try:
+                wb = load_workbook(filename=BytesIO(fichier.read()), read_only=True)
+                ws = wb.active
+                nb_lignes = ws.max_row
+                st.write(f"📄 `{fichier.name}` → `{nb_lignes}` lignes")
+            except Exception as e:
+                st.error(f"❌ Erreur dans `{fichier.name}` : {e}")
