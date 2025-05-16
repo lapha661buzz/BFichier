@@ -15,7 +15,9 @@ if fichier:
     st.write(f"📦 Taille du fichier : `{taille}` octets")
 
     if taille >= 10 * 1024:
-try:
+        st.error("❌ Le fichier dépasse 10 Ko.")
+    else:
+        try:
             wb = load_workbook(filename=BytesIO(fichier.read()), read_only=True)
             ws = wb.active
             nb_lignes = ws.max_row
@@ -23,6 +25,3 @@ try:
             st.write(f"📈 Nombre total de lignes : `{nb_lignes}`")
         except Exception as e:
             st.error(f"❌ Erreur lors de la lecture du fichier : {e}")
-        st.error("❌ Le fichier dépasse 10 Ko.")
-    else:
-        
