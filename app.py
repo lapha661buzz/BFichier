@@ -14,7 +14,7 @@ if fichier:
     taille = len(fichier.getvalue())
     st.write(f"📦 Taille du fichier : `{taille}` octets")
 
-    if taille >= 10 * 1024:
+    if taille >= 0 * 1024:
         st.error("❌ Le fichier dépasse 10 Ko.")
     else:
         try:
